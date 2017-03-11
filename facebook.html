@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Facebook Login - Federated Authentication</title>
+  <meta charset="UTF-8">
+  <script src="/js/jsbn.js"></script>
+  <script src="/js/jsbn2.js"></script>
+  <script src="/js/sjcl.js"></script>
+  <script src="/js/moment.min.js"></script>
+  <script src="/js/aws-cognito-sdk.min.js"></script>
+  <script src="/js/amazon-cognito-identity.min.js"></script>
+  <script src="/js/aws-sdk-2.7.20.min.js"></script>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
+  <meta http-equiv="Pragma" content="no-cache"/>
+  <meta http-equiv="Expires" content="0"/>
+  </head>
+<body>
+<script type="text/javascript">
+  // This is called with the results from from FB.getLoginStatus().
+  function statusChangeCallback(response) {
+    console.log('statusChangeCallback');
+    console.log('response:::: ' + response);
+    // The response object is returned with a status field that lets the
+    // app know the current login status of the person.
+    // Full docs on the response object can be found in the documentation
+    // for FB.getLoginStatus().
+    if (response.status === 'connected') {
+      // Logged into your app and Facebook.
+      var uid = response.authResponse.userID;
+      var accessToken = response.authResponse.accessToken;
+      console.log('uid: ' + uid);
+      console.log('token: ' + accessToken);
+      document.getElementById('status').innerHTML = 'you are logged in:  ' + response;
+
+      // Initialize the Amazon Cognito credentials provider
+      AWS.config.region = 'ap-southeast-2'; // Region
+      AWS.config.credentials = new AWS.CognitoIdentityCredentials({
+          IdentityPoolId: 'ap-southeast-2:76a4675f-eef4-45ee-8659-3759b100afce',
+          Logins: {
+            'graph.facebook.com': response.authResponse.accessToken
+           }
+      });
+
+console.log('accessToken:-: ' + response.authResponse.accessToken);
+
+// --- USER POOL DATA
+ AWSCognito.config.region = 'ap-southeast-2';
+var poolData = {
+  UserPoolId : 'ap-southeast-2_vdSCje1nf',
+  ClientId : '4sc9tet6f531td9r5f3iisjh7e'
+};
+var userPool =
+new AWSCognito.CognitoIdentityServiceProvider.CognitoUserPool(poolData);
+
+var attributeList = [];
+var dataName = {
+    Name : 'name',
+    Value : 'dilbert'
+};
+var dataUserName = {
+    Name : 'username',
+    Value : 'dilbert'
+};
+var dataPwd = {
+  Name : 'password',
+  Value : '1024@Ssh'
+}
+var attributeName = new AWSCognito.CognitoIdentityServiceProvider.CognitoUserAttribute(dataName);
+var attributePwd = new AWSCognito.CognitoIdentityServiceProvider.CognitoUserAttribute(dataPwd);
+attributeList.push(attributeName);
+attributeList.push(attributePwd);
+
+// http://docs.aws.amazon.com/cognito/latest/developerguide/amazon-cognito-integrating-user-pools-with-identity-pools.html
+//AWSCognito.config.update({accessKeyId: 'AKIAI26F7EXBANUKGTZA', secretAccessKey: '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'})
+
+
+var cognitoUser = userPool.getCurrentUser();
+console.log('++ user: ' + cognitoUser);
+if (cognitoUser != null) {
+	cognitoUser.getSession(function(err, result) {
+    if (err) {
+      alert(err);
+      return;
+    }
+    console.log('session validity: ' + session.isValid());
+    // continue: http://docs.aws.amazon.com/cognito/latest/developerguide/using-amazon-cognito-user-identity-pools-javascript-examples.html
+		if (result) {
+			console.log('You are now logged in.');
+
+			// Add the User's Id Token to the Cognito credentials login map.
+
+      AWS.config.region = 'ap-southeast-2'; // Region
+			AWS.config.credentials = new AWS.CognitoIdentityCredentials({
+				IdentityPoolId: 'ap-southeast-2:76a4675f-eef4-45ee-8659-3759b100afce',
+				Logins: {
+					'cognito-idp.ap-southeast-2.amazonaws.com/ap-southeast-2_vdSCje1nf': result.getIdToken().getJwtToken()
+				}
+			});
+      
+		}
+	});
+}
+else {
+    console.log('---mate you are NOT logged in to Cognito');
+}
+
+// refresh credentials
+// Obtain AWS credentials
+    AWS.config.credentials.get(function(){
+        // Access AWS resources here.
+    });
+
+
+      testAPI();
+    } else if (response.status === 'not_authorized') {
+      // The person is logged into Facebook, but not your app.
+      document.getElementById('status').innerHTML = 'Please log ' +
+        'into this app.';
+    } else {
+      // The person is not logged into Facebook, so we're not sure if
+      // they are logged into this app or not.
+      document.getElementById('status').innerHTML = 'Please log ' +
+        'into Facebook.';
+    }
+  }
+
+  // This function is called when someone finishes with the Login
+  // Button.  See the onlogin handler attached to it in the sample
+  // code below.
+  function checkLoginState() {
+    FB.getLoginStatus(function(response) {
+      statusChangeCallback(response);
+    });
+  }
+
+  window.fbAsyncInit = function() {
+  FB.init({
+    appId      : '646471348848043',
+    cookie     : true,  // enable cookies to allow the server to access
+                        // the session
+    xfbml      : true,  // parse social plugins on this page
+    version    : 'v2.8' // use graph api version 2.8
+  });
+
+
+  // Now that we've initialized the JavaScript SDK, we call
+  // FB.getLoginStatus().  This function gets the state of the
+  // person visiting this page and can return one of three states to
+  // the callback you provide.  They can be:
+  //
+  // 1. Logged into your app ('connected')
+  // 2. Logged into Facebook, but not your app ('not_authorized')
+  // 3. Not logged into Facebook and can't tell if they are logged into
+  //    your app or not.
+  //
+  // These three cases are handled in the callback function.
+
+  FB.getLoginStatus(function(response) {
+    statusChangeCallback(response);
+  });
+
+  };
+
+  // Load the SDK asynchronously
+  (function(d, s, id) {
+    var js, fjs = d.getElementsByTagName(s)[0];
+    if (d.getElementById(id)) return;
+    js = d.createElement(s); js.id = id;
+    //js.src = "//connect.facebook.net/en_US/sdk.js";
+    js.src = "/js/fb_sdk.js";
+    fjs.parentNode.insertBefore(js, fjs);
+  }(document, 'script', 'facebook-jssdk'));
+
+  // Here we run a very simple test of the Graph API after login is
+  // successful.  See statusChangeCallback() for when this call is made.
+  function testAPI() {
+    console.log('Welcome!  Fetching your information.... ');
+
+    FB.api('/me', function(response) {
+      console.log('Successful login for: ' + response.name);
+
+
+      document.getElementById('status').innerHTML =
+        'Thanks for logging in, ' + response.name;
+
+    });
+  }
+
+</script>
+
+<!--
+  Below we include the Login Button social plugin. This button uses
+  the JavaScript SDK to present a graphical Login button that triggers
+  the FB.login() function when clicked.
+-->
+
+<fb:login-button scope="public_profile,email" onlogin="checkLoginState();">
+</fb:login-button>
+
+
+<div id="status">
+</div>
+
+
+<a href="index_cognito.html">back to index page</a>
+
+</body>
+</html>

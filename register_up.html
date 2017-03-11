@@ -1,0 +1,103 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <script src='./js/aws-cognito-sdk.min.js'></script>
+  <script src='./js/amazon-cognito-identity.min.js'></script>
+  <title>Register User to Cognito User Pool</title>
+</head>
+
+<body>
+  <p>This is only a PoC and it registers a new user to the Cognito User Pool.
+  You will need to confirm your registration later on.</p>
+
+
+ <form id="regForm" method="post" onsubmit="register(); return false;">
+   <fieldset>
+
+    <label for="myUserName">Name:</label><br />
+    <input type="text" required id="myUserName" />
+    </p>
+
+    <label for="myName">User name:</label><br />
+    <input type="text" required id="myName" />
+    </p>
+
+    <label for="myEmail">Email:</label><br />
+    <input type="text" required id="myEmail" />
+    </p>
+
+    <label for="myPhone">Phone (+612...):</label><br />
+    <input type="text" required id="myPhone" placeholder="+6120123456" />
+    </p>
+
+    <input type="submit" name="submit" id="submit" value="Submit" />
+    </fieldset>
+  </form>
+
+
+<p>
+<a href="index_cognito.html">Back to index page</a>
+</p>
+
+
+<script>
+
+function register() {
+
+AWSCognito.config.region = 'ap-southeast-2';
+
+var poolData = {
+    UserPoolId : 'ap-southeast-2_vdSCje1nf', // your user pool
+    ClientId : '4uagmqripa4laldv6p1h461r3q' // your app client id here
+};
+var userPool =
+new AWSCognito.CognitoIdentityServiceProvider.CognitoUserPool(poolData);
+
+var uName = document.getElementById('regForm').myUserName.value;
+var attributeList = [];
+
+  var dataEmail = {
+      Name : 'email',
+      Value : document.getElementById('regForm').myEmail.value
+  };
+  var dataPhoneNumber = {
+      Name : 'phone_number',
+      Value : document.getElementById('regForm').myPhone.value
+  };
+  var dataName = {
+      Name : 'name',
+      Value : document.getElementById('regForm').myName.value
+  };
+  var attributeEmail = new AWSCognito.CognitoIdentityServiceProvider.CognitoUserAttribute(dataEmail);
+  var attributePhoneNumber = new AWSCognito.CognitoIdentityServiceProvider.CognitoUserAttribute(dataPhoneNumber);
+  var attributeName = new AWSCognito.CognitoIdentityServiceProvider.CognitoUserAttribute(dataName);
+
+  attributeList.push(attributeEmail);
+  attributeList.push(attributePhoneNumber);
+  attributeList.push(attributeName);
+
+  //userPool.signUp('username', 'password', attributeList, null, function(err, result){
+  userPool.signUp(uName, 'P@ssw0rd', attributeList, null, function(err, result){
+      if (err) {
+          alert(err);
+          //return;
+          document.getElementById('status').innerHTML = 'There was an error';
+          return false;
+      }
+      cognitoUser = result.user;
+      console.log('user name is ' + cognitoUser.getUsername());
+      document.getElementById('status').innerHTML = 'Successful:  You will need to confirm your registration later on.';
+
+  });
+}
+
+</script>
+
+
+<div id="status">
+</div>
+
+</body>
+
+</html>

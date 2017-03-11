@@ -1,0 +1,109 @@
+
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+
+  <script src='./js/jsbn.js'></script>
+  <script src='./js/jsbn2.js'></script>
+  <script src='./js/aws-cognito-sdk.min.js'></script>
+  <script src='./js/amazon-cognito-identity.min.js'></script>
+  <script src='./js/aws-sdk-2.7.20.min.js'></script>
+
+<!--
+  <script src='aws-sdk-2.22.0-cognito-only.js'></script>script>
+-->
+  <title>Authenticate User against Cognito User Pool</title>
+</head>
+
+<body>
+  <p>Please enter user name and password for authentication</p>
+
+<!--
+ <form id="authForm" method="post" onsubmit="authenticate(); return false;">
+   <fieldset>
+
+    <label for="myUserName">Name:</label><br />
+    <input type="text" required id="myUserName" />
+    </p>
+
+    <label for="myPwd">Password:</label><br />
+    <input type="password" required id="myPwd" />
+    </p>
+
+    <input type="submit" name="submit" id="submit" value="Submit" />
+    </fieldset>
+  </form>
+-->
+
+<p>
+<a href="index_cognito.html">Back to index page</a>
+</p>
+
+
+<script>
+
+//function authenticate() {
+
+   var pwd = "P@ssw0rd";
+   var usr = "geraldb";
+   var usrPoolId = "ap-southeast-2_vdSCje1nf";
+   var clientId = "4uagmqripa4laldv6p1h461r3q";
+
+//https://github.com/aws/amazon-cognito-identity-js/
+//Use case 4. Authenticating a user and establishing a user session with the Amazon Cognito Identity service.
+
+
+    // Cognito User Pool Id
+    AWSCognito.config.region = 'ap-southeast-2';
+    // Need to provide placeholder keys unless unauthorised user access is enabled for user pool
+    AWSCognito.config.update({accessKeyId: 'anything', secretAccessKey: 'anything'})
+
+    AWSCognito.config.credentials = new AWS.CognitoIdentityCredentials({
+        IdentityPoolId: 'ap-southeast-2:76a4675f-eef4-45ee-8659-3759b100afce'
+    });
+    //
+
+    var poolData = {
+        UserPoolId : usrPoolId, // Your user pool id here
+        ClientId : clientId // Your client id here
+    };
+    var userPool = new AWSCognito.CognitoIdentityServiceProvider.CognitoUserPool(poolData);
+    var authenticationData = {
+            Username : usr,
+            Password : pwd,
+        };
+    var authenticationDetails = new AWSCognito.CognitoIdentityServiceProvider.AuthenticationDetails(authenticationData);
+    var userData = {
+            Username : usr,
+            Pool : userPool
+        };
+    console.log("userData" + userData);
+    var cognitoUser = new AWSCognito.CognitoIdentityServiceProvider.CognitoUser(userData);
+        cognitoUser.authenticateUser(authenticationDetails, {
+            onSuccess: function (result) {
+                console.log('access token + ' + result.getAccessToken().getJwtToken());
+                console.log('User object: ', cognitoUser);
+                console.log('result: ', result)
+            },
+
+            onFailure: function(err) {
+                alert(err);
+            },
+  });
+//---- next step: store train line
+
+console.log('----cognitoUser: ', cognitoUser);
+
+//}
+
+
+</script>
+
+
+<div id="status">
+</div>
+
+</body>
+
+</html>

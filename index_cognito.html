@@ -1,0 +1,31 @@
+<!DOCTYPE HTML>
+<html lang="en">
+	<head>
+    <meta charset="utf-8" />
+    <title>AWS Cognito PoC - Overview</title>
+		<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
+    <meta http-equiv="Pragma" content="no-cache"/>
+    <meta http-equiv="Expires" content="0"/>
+  </head>
+<body>
+<p>This is a simple Cognito PoC that shows identity administration via AWS Cognito.
+  Pre-requisites for this PoC are:</p>
+  <ul>
+    <li>AWS: you will need to <a href="http://docs.aws.amazon.com/cognito/latest/developerguide/identity-pools.html" target="blank">setup a Cognito Idenity Pool</a></li>
+    <li>Facebook: you need to <a href="https://developers.facebook.com/docs/apps/register" target="blank">create an application ID</a></li>
+		<li>AWS: enable <a href="http://docs.aws.amazon.com/AmazonS3/latest/dev/cors.html" target="blank">CORS</a> on your S3 bucket</li>
+</ul>
+ <p>The PoC achieves the following outcomes:</p>
+<ul>
+ <li><a href="anonymous.html">anonymous.html</a>: Registers a new anonymous users to the Identity Pool</li>
+ <li><a href="facebook.html">facebook.html</a>: Authenticates a user via Facebook and registers the authenticated user to the Identity Pool</li>
+ <li><a href="register_up.html">register1.html</a>: Captures user information registers a new user to the Cognito 	     User Pool</li>
+ <li><a href="authenticate_up.html">authenticate_up.html</a>authenticates a user and shows the user details</li>
+ <li>Next step #1 - to be implemented: read & updated custom attribute in user pool</li>
+ <li>Next step #2 - track user preferences of both user types and show them on a new page</li>
+</ul>
+
+
+</body>
+
+</html>
